@@ -24,3 +24,6 @@ pfix: ## Run php cs fixer for podman
 
 pstan: ## Run phpstan for podman
 	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpstan
+
+punit: ## Run phpstan for podman
+	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpunit
