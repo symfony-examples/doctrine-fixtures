@@ -16,7 +16,7 @@ exec('php bin/console --env=test cache:warmup');    # Warmup the cache before ex
  * - Load fixtures.
  */
 echo "--- Configure database --- \n";
-exec('php bin/console --env=test doctrine:database:create --if-not-exists');
+exec('php bin/console --env=test doctrine:database:create');
 exec('php bin/console --env=test doctrine:migration:migrate -n');
 exec('php bin/console --env=test doctrine:fixtures:load --group=test -n');
 
