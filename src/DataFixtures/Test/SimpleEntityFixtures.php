@@ -12,8 +12,8 @@ final class SimpleEntityFixtures extends AbstractTestFixtures
     public function load(ObjectManager $manager): void
     {
         $entity = (new SimpleEntity())
-            ->setTitle('Simple entity title for test purpose')
-            ->setCreated(new \DateTime())
+            ->setTitle(title: 'Simple entity title for test purpose')
+            ->setCreated(created: new \DateTime())
         ;
 
         $manager->persist($entity);

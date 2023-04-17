@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Repository;
 
-use App\Entity\SimpleEntity;
+use App\Entity\SharedEntityChildren;
+use App\Entity\SharedEntityParent;
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Persistence\ObjectRepository;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
-final class SimpleEntityRepositoryTest extends KernelTestCase
+final class SharedEntityChildrenTest extends KernelTestCase
 {
     private ObjectRepository $objectRepository;
 
@@ -29,7 +30,7 @@ final class SimpleEntityRepositoryTest extends KernelTestCase
             throw new \Exception(message: 'Failed to load manager');
         }
 
-        $this->objectRepository = $manager->getRepository(SimpleEntity::class);
+        $this->objectRepository = $manager->getRepository(SharedEntityChildren::class);
     }
 
     public function testCountFindAll(): void
@@ -37,18 +38,23 @@ final class SimpleEntityRepositoryTest extends KernelTestCase
         $all = $this->objectRepository->findAll();
 
         self::assertCount(
-            expectedCount: 1,
+            expectedCount: 2,
             haystack: $all
         );
     }
 
     public function testPersistedEntity(): void
     {
-        $entity = $this->objectRepository->findOneBy(criteria: ['title' => 'Simple entity title for test purpose']);
+        $entity = $this->objectRepository->findOneBy(criteria: ['title' => 'first shared children']);
 
         self::assertInstanceOf(
-            expected: SimpleEntity::class,
+            expected: SharedEntityChildren::class,
             actual: $entity
+        );
+
+        self::assertInstanceOf(
+            expected: SharedEntityParent::class,
+            actual: $entity->getOwner()
         );
     }
 }
