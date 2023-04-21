@@ -44,7 +44,7 @@ final class SimpleEntityRepositoryTest extends KernelTestCase
 
     public function testPersistedEntity(): void
     {
-        $entity = $this->objectRepository->findOneBy(criteria: ['title' => 'Simple entity title for test purpose']);
+        $entity = $this->objectRepository->findOneBy(criteria: ['title' => 'Simple entity title']);
 
         self::assertInstanceOf(
             expected: SimpleEntity::class,

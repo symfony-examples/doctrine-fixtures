@@ -12,7 +12,7 @@ final class SimpleEntityFixtures extends AbstractDevFixtures
     public function load(ObjectManager $manager): void
     {
         $entity = (new SimpleEntity())
-            ->setTitle('Simple entity title for dev purpose')
+            ->setTitle('Simple entity title')
             ->setCreated(new \DateTime())
         ;
 
