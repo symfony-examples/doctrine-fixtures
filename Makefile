@@ -1,33 +1,47 @@
 CONTAINER_NAME=symfony-examples-doctrine-fixture
 
-###############################################################################
-# Podman commands
-###############################################################################
+ifneq (, $(shell which podman 2> /dev/null))
+CONTAINER_ENGINE=podman
+endif
+
+ifneq (, $(shell which docker 2> /dev/null))
+CONTAINER_ENGINE=docker
+endif
 
 ###
 # Container commands
 ###
-.PHONY: pbuild, prun
-pbuild: ## Build container for podman
-	podman build -t ${CONTAINER_NAME} .
+.PHONY: build, run
+build: ## Build container for podman
+	${CONTAINER_ENGINE} build -t ${CONTAINER_NAME} .
 
-prun: ## Run container for podman
-	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged -p 8000:8000 ${CONTAINER_NAME} bash
+run: ## Run container for podman
+	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged -p 8000:8000 ${CONTAINER_NAME} bash
+
+
+###
+# Project commands
+###
+
+install:
+	$(MAKE) build
+	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} composer install -n
 
 ###
 # Quality tools
 ###
-.PHONY: pfix, pstan, punit, pcheck-all
-pfix: ## Run php cs fixer for podman
-	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/php-cs-fixer fix
 
-pstan: ## Run phpstan for podman
-	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpstan
+.PHONY: fix, phpstan, unit, check-all
+fix: ## Run php cs fixer for podman
+	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/php-cs-fixer fix
 
-punit: ## Run phpstan for podman
-	podman run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpunit
+phpstan: ## Run phpstan for podman
+	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpstan
 
-pcheck-all: ## Run all tests for podman
-	$(MAKE) pfix
-	$(MAKE) pstan
-	$(MAKE) punit
+unit: ## Run phpstan for podman
+	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/phpunit
+
+check-all: ## Run all tests for podman
+	$(MAKE) fix
+	$(MAKE) phpstan
+	$(MAKE) unit
