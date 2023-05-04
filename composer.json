@@ -2,6 +2,8 @@
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
+    "description": "Symfony doctrine fixtures",
+    "name": "symfony-examples/doctrine-fixtures",
     "prefer-stable": true,
     "require": {
         "php": ">=8.2",
