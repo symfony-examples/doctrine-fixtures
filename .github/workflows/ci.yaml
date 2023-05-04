@@ -1,0 +1,63 @@
+name: SF Doctrine fixtures CI
+
+on:
+  push
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: 'actions/checkout@v3'
+        name: Checkout
+        with:
+          persist-credentials: false
+
+      - name: Validates composer.json file content
+        run: composer validate
+
+      - name: Security checker
+        run: |
+          curl -L https://github.com/fabpot/local-php-security-checker/releases/download/v1.2.0/local-php-security-checker_1.2.0_linux_386 --output local-php-security-checker
+          chmod +x local-php-security-checker
+          ./local-php-security-checker --path=./composer.lock
+
+  tests-and-code-quality:
+    runs-on: ubuntu-latest
+    needs: security
+    env:
+      CONTAINER_NAME: ci-container
+    steps:
+      - uses: 'actions/checkout@v3'
+        name: Checkout
+        with:
+          persist-credentials: false
+
+      - name: Set up Depot CLI
+        uses: 'depot/setup-action@v1'
+
+      # @see https://github.com/depot/build-push-action
+      - name: Build docker image for CI
+        uses: 'depot/build-push-action@v1'
+        with:
+          project: ${{ secrets.DEPOT_PROJECT_ID }}
+          token: ${{ secrets.DEPOT_PROJECT_TOKEN }}
+          push: false
+          tags: symfony-doctrine-fixtures:ci
+          context: .
+          file: ./Containerfile
+          load: true # (--load) to download the image to local Docker daemon
+
+      - name: Run docker container
+        run: docker run -d --name ${CONTAINER_NAME} symfony-doctrine-fixtures:ci
+
+      - name: PHP unit tests
+        run: docker exec ${CONTAINER_NAME} ./vendor/bin/phpunit
+
+      - name: PHP code standard fixer (dry run)
+        run: docker exec ${CONTAINER_NAME} ./vendor/bin/php-cs-fixer fix --config=.php-cs-fixer.dist.php --dry-run
+
+      - name: PHP code static analyses
+        run: docker exec ${CONTAINER_NAME} ./vendor/bin/phpstan analyse -c phpstan.neon
+
+      - name: Remove docker container
+        run: docker rm -f ${CONTAINER_NAME}

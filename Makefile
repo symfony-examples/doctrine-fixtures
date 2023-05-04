@@ -17,9 +17,10 @@ endif
 ##
 ## Container commands
 ##----------------------------------------------------------------------------------------------------------------------
-.PHONY: build, run
+.PHONY: build run
+
 build: ## Build container for podman
-	${CONTAINER_ENGINE} build -f Containerfile -t ${CONTAINER_NAME} .
+	${CONTAINER_ENGINE} build -f Containerfile -t ${CONTAINER_NAME} --target local .
 
 run: ## Run container for podman
 	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged -p 8000:8000 ${CONTAINER_NAME} bash
@@ -28,6 +29,7 @@ run: ## Run container for podman
 ##
 ## Project commands
 ##----------------------------------------------------------------------------------------------------------------------
+.PHONY: install
 
 install: ## Build and run container
 	$(MAKE) build
@@ -36,8 +38,8 @@ install: ## Build and run container
 ##
 ## Quality tools
 ##----------------------------------------------------------------------------------------------------------------------
+.PHONY: fix phpstan unit check-all
 
-.PHONY: fix, phpstan, unit, check-all
 fix: ## Run php cs fixer for podman
 	${CONTAINER_ENGINE} run --rm -it -v ${PWD}:/var/www/symfony --privileged ${CONTAINER_NAME} vendor/bin/php-cs-fixer fix
 
